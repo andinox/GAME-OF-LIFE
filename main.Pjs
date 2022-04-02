@@ -1,0 +1,136 @@
+/*
+* Start of project = 02/12/2021 at 11:33
+* End of project = ***
+*/
+
+//déclaration de variable
+boolean Started = false;
+char Started_text = "Start";
+int ArraysLenght = 25;
+int[][] boxLifeArrays = new int[ArraysLenght][ArraysLenght];
+float cubeLifeLength = 499.0/ArraysLenght;
+
+void setup() {
+	frameRate(10);
+	textSize(20);
+  size(500,600);
+  background(255,255,255);
+  fill(0);
+  for (int i = 0; i < ArraysLenght+1; i++) {
+    line(i*cubeLifeLength,0,cubeLifeLength*i,499);
+    line(0,i*cubeLifeLength,499,cubeLifeLength*i);
+	}
+	for (int i = 0; i < ArraysLenght; i++) {
+		for (int e = 0; e < ArraysLenght; e++) {
+			g = random(0,1);
+			boxLifeArrays[i][e] = (g>0.60) ? 0:1;
+		}
+	}
+	fill(255);
+  rect(20,550,50,25);
+	fill(0);
+	text(Started_text,22,555,70,580);
+	refresh();
+}
+
+
+void refresh() {
+	for (int i = 0; i < ArraysLenght; i++) {
+		for (int e = 0; e < ArraysLenght; e++) {
+			if (boxLifeArrays[i][e] == 0) {
+				fill(255);
+				rect(i*cubeLifeLength,e*cubeLifeLength,cubeLifeLength,cubeLifeLength);
+			} else {
+				fill(0);
+				rect(i*cubeLifeLength,e*cubeLifeLength,cubeLifeLength,cubeLifeLength);					
+			}
+		}
+	}
+}
+
+int getALive(int a, int b) {
+	int lives = 0;
+	if (boxLifeArrays[a][b] == 1) {
+		lives -= 1;
+	}
+	b -= 1;
+	a -= 1;
+	for (int i = 0; i < 3; i++) {
+		for (int z = 0; z < 3; z++) {
+			if ( -1 < (a+i) && (a+i) < ArraysLenght && -1 < (b+z) && (b+z) < ArraysLenght ) {
+				if (boxLifeArrays[a+i][b+z] == 1) {
+					lives += 1;
+				}
+			}
+		}
+	}
+	return(lives);
+}
+
+void setLaw() {
+	int[][] boxLifeArraysAfter = new int[ArraysLenght][ArraysLenght];
+	for (int i = 0; i < ArraysLenght; i++) {
+		for (int p = 0; p < ArraysLenght; p++) {
+			alives = getALive(i,p);
+			if (alives <= 2 && boxLifeArrays[i][p] == 1) {
+				boxLifeArraysAfter[i][p] = 0;
+			}
+			if (alives == 3) {
+				boxLifeArraysAfter[i][p] = 1;
+			}
+			if (alives == 2 && boxLifeArrays[i][p] == 1) {
+				boxLifeArraysAfter[i][p] = 1;
+			}
+			if (alives >= 4 && boxLifeArrays[i][p] == 1) {
+				boxLifeArraysAfter[i][p] = 0;
+			}
+		}
+	}
+	for (int f = 0; f < ArraysLenght; f++) {
+		for (int z = 0; z < ArraysLenght; z++) {
+			boxLifeArrays[f][z] = boxLifeArraysAfter[f][z];
+		}
+	}
+}
+
+
+void cubeAlive(float x, float y) {
+	int arrayX = int(x/float(cubeLifeLength)+1); //don't forget to remove 1
+	int arrayY = int(y/float(cubeLifeLength)+1); //don't forget to remove 1
+	if (boxLifeArrays[arrayX-1][arrayY-1] == 0) {
+		boxLifeArrays[arrayX-1][arrayY-1] = 1;
+		fill(0);
+		rect((arrayX-1)*cubeLifeLength,(arrayY-1)*cubeLifeLength,cubeLifeLength-0.1,cubeLifeLength-0.1);
+	} else {
+		boxLifeArrays[arrayX-1][arrayY-1] = 0;
+		fill(255);
+		rect((arrayX-1)*cubeLifeLength,(arrayY-1)*cubeLifeLength,cubeLifeLength-0.1,cubeLifeLength-0.1);
+	}
+}
+void draw() {
+	if (Started) {
+		setLaw();
+		refresh();
+	}		
+	if (mousePressed) {
+		if (mouseX >= 20 && mouseX <= 20+50 && mouseY >= 550 && mouseY <= 550+25) {
+			if (Started == false) {
+				Started = true;
+				Started_text = "Stop";
+				fill(255);
+    		rect(20,550,50,25);
+				fill(0);
+				text(Started_text,22,555,70,580);
+			} else {
+				Started = false;
+				Started_text = "Start";			
+				fill(255);
+    		rect(20,550,50,25);
+				fill(0);
+				text(Started_text,22,555,70,580);
+			} 
+		} else if (mouseX >= 0 && mouseX <= 498 && mouseY >= 0 && mouseY <= 498 && Started == false) {
+				cubeAlive(mouseX,mouseY);
+		}	
+	}
+}
